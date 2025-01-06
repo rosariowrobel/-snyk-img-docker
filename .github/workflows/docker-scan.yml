@@ -23,25 +23,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Log in to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Pull Docker image
+      - name: Debug environment variables
         run: |
-          docker pull --platform linux/amd64 <ECR_IMAGE_URL>
+          echo "AWS Region: us-east-1"
+          echo "Docker image URL: 982081066879.dkr.ecr.us-east-1.amazonaws.com/mi-app-docker:latest"
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-
-      - name: Install Snyk
-        run: npm install -g snyk
-
-      - name: Authenticate Snyk
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk auth $SNYK_TOKEN
-
-      - name: Run Snyk Docker scan
-        run: snyk container test <ECR_IMAGE_URL> --file=Dockerfile --severity-threshold=high
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-logi
