@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3 # Verifica que la referencia sea correcta
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v2 # Asegúrate de usar la versión correcta
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -29,4 +29,24 @@ jobs:
           echo "Docker image URL: 982081066879.dkr.ecr.us-east-1.amazonaws.com/mi-app-docker:latest"
 
       - name: Log in to Amazon ECR
-        uses: aws-actions/amazon-ecr-logi
+        uses: aws-actions/amazon-ecr-login@v1 # Asegúrate de usar esta acción con la versión correcta
+
+      - name: Pull Docker image
+        run: |
+          docker pull --platform linux/amd64 982081066879.dkr.ecr.us-east-1.amazonaws.com/mi-app-docker:latest
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3 # Verifica que la versión sea correcta
+        with:
+          node-version: '16'
+
+      - name: Install Snyk
+        run: npm install -g snyk
+
+      - name: Authenticate Snyk
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk auth $SNYK_TOKEN
+
+      - name: Run Snyk Docker scan
+        run: snyk container test 982081066879.dkr.ecr.us-east-1.amazonaws.com/mi-app-docker:latest --file=Dockerfile --severity-threshold=high
